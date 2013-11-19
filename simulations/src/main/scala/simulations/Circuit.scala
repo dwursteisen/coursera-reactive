@@ -1,13 +1,12 @@
 package simulations
 
-import common._
 
 class Wire {
   private var sigVal = false
   private var actions: List[Simulator#Action] = List()
 
   def getSignal: Boolean = sigVal
-  
+
   def setSignal(s: Boolean) {
     if (s != sigVal) {
       sigVal = s
@@ -31,7 +30,7 @@ abstract class CircuitSimulator extends Simulator {
     wire addAction {
       () => afterDelay(0) {
         println(
-          "  " + currentTime + ": " + name + " -> " +  wire.getSignal)
+          "  " + currentTime + ": " + name + " -> " + wire.getSignal)
       }
     }
   }
@@ -39,7 +38,9 @@ abstract class CircuitSimulator extends Simulator {
   def inverter(input: Wire, output: Wire) {
     def invertAction() {
       val inputSig = input.getSignal
-      afterDelay(InverterDelay) { output.setSignal(!inputSig) }
+      afterDelay(InverterDelay) {
+        output.setSignal(!inputSig)
+      }
     }
     input addAction invertAction
   }
@@ -48,7 +49,9 @@ abstract class CircuitSimulator extends Simulator {
     def andAction() {
       val a1Sig = a1.getSignal
       val a2Sig = a2.getSignal
-      afterDelay(AndGateDelay) { output.setSignal(a1Sig & a2Sig) }
+      afterDelay(AndGateDelay) {
+        output.setSignal(a1Sig & a2Sig)
+      }
     }
     a1 addAction andAction
     a2 addAction andAction
@@ -62,7 +65,9 @@ abstract class CircuitSimulator extends Simulator {
     def orAction() {
       val a1Sig = a1.getSignal
       val a2Sig = a2.getSignal
-      afterDelay(AndGateDelay) { output.setSignal(a1Sig | a2Sig) }
+      afterDelay(AndGateDelay) {
+        output.setSignal(a1Sig | a2Sig)
+      }
     }
     a1 addAction orAction
     a2 addAction orAction
@@ -77,27 +82,22 @@ abstract class CircuitSimulator extends Simulator {
   }
 
   def demux(in: Wire, c: List[Wire], out: List[Wire]) {
-    out match {
-      case Nil => ()
-      case d0 :: Nil => {
-        andGate(in, in, d0)
+    c match {
+      case Nil => {
+        andGate(in, in, out.head)
       }
-      case d0::d1::tail => {
-        c match {
-          case Nil => ()
-          case head::tail => {
-            val iHead = new Wire
-            inverter(head, iHead)
-            andGate(in, iHead, d0)
-            andGate(in, head, d1)
-          }
-        }
-
+      case head :: tail => {
+        val iHead, d0, d1 = new Wire
+        inverter(head, iHead)
+        andGate(in, iHead, d0)
+        andGate(in, head, d1)
+        demux(d0, tail, out.slice(0, out.length / 2))
+        demux(d1, tail, out.slice(out.length / 2, out.length))
       }
-
     }
 
   }
+
 
 }
 

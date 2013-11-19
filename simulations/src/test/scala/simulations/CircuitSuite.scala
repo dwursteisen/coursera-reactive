@@ -98,7 +98,7 @@ class CircuitSuite extends CircuitSimulator with FunSuite {
     assert(out.getSignal === false, "and 2")
 
   }
-  test("demux2") {
+  test("demux 1byte") {
     val in, out1, out2, c = new Wire
     demux(in, List(c), List(out1, out2))
     in.setSignal(true)
@@ -125,6 +125,50 @@ class CircuitSuite extends CircuitSimulator with FunSuite {
     run
     assert(out1.getSignal === false, "and 2")
     assert(out1.getSignal === false, "and 2")
+
+  }
+  
+  test("demux 2bytes") {
+    val in, out1, out2, out3, out4, c1, c2 = new Wire
+    demux(in, List(c1, c2), List(out1, out2, out3, out4))
+    in.setSignal(true)
+
+    c1.setSignal(false)
+    c2.setSignal(false)
+    run
+
+    assert(out1.getSignal === true, "0 => 00 != 1")
+    assert(out2.getSignal === false, "0 => 01 != 0")
+    assert(out3.getSignal === false, "0 => 10 != 0")
+    assert(out4.getSignal === false, "0 => 11 != 0")
+
+    c1.setSignal(false)
+    c2.setSignal(true)
+    run
+
+    assert(out1.getSignal === false, "1 => 0 != 0")
+    assert(out2.getSignal === true, "1 => 1 != 1")
+    assert(out3.getSignal === false, "1 => 10 != 0")
+    assert(out4.getSignal === false, "1 => 11 != 0")
+
+    c1.setSignal(true)
+    c2.setSignal(false)
+    run
+
+    assert(out1.getSignal === false, "10 => 0 != 0")
+    assert(out2.getSignal === false, "10 => 1 != 0")
+    assert(out3.getSignal === true, "10 => 10 != 1")
+    assert(out4.getSignal === false, "10 => 11 != 0")
+
+    c1.setSignal(true)
+    c2.setSignal(true)
+    run
+
+    assert(out1.getSignal === false, "11 => 0 != 0")
+    assert(out2.getSignal === false, "11 => 1 != 0")
+    assert(out3.getSignal === false, "11 => 10 != 0")
+    assert(out4.getSignal === true, "11 => 11 != 1")
+
 
   }
 
