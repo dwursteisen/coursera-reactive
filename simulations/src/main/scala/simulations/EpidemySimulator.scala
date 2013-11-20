@@ -12,11 +12,25 @@ class EpidemySimulator extends Simulator {
     val roomColumns: Int = 8
 
     // to complete: additional parameters of simulation
+    val prevalenceRate: Float = 0.01f
+
+    def numberOfInfected: Int = Math.round(population * prevalenceRate)
   }
 
   import SimConfig._
 
-  val persons: List[Person] = List() // to complete: construct list of persons
+  val persons: List[Person] = buildPersons()
+
+  def buildPersons(): List[Person] = {
+    val peoples: Seq[Person] = for {
+      id <- 0 to population
+    } yield {
+      val p = new Person(id)
+      p.infected = id < numberOfInfected
+      p
+    }
+    peoples.toList
+  }
 
   class Person (val id: Int) {
     var infected = false
